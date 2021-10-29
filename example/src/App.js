@@ -1,11 +1,10 @@
 import React from 'react'
-import { useMyHook } from 'react-event-forwarder'
+import Parent from './Prent.jsx'
 
 const App = () => {
-  const example = useMyHook()
   return (
     <div>
-      {example}
+      <Parent things={['first', 'second', 'third']} />
     </div>
   )
 }

@@ -1,21 +1,5 @@
-import * as React from 'react'
+import useCreateEvtForwarder from './hook/useCreateEvtForwarder'
+import withCreateEvtForwarder from './hoc/withEvtForwarder.jsx'
+import createEvtForwarder from './method/createEvtForwarder'
 
-export const useMyHook = () => {
-  let [{
-    counter
-  }, setState] = React.useState({
-    counter: 0
-  })
-
-  React.useEffect(() => {
-    let interval = window.setInterval(() => {
-      counter++
-      setState({counter})
-    }, 1000)
-    return () => {
-      window.clearInterval(interval)
-    }
-  }, [])
-
-  return counter
-}
+export { createEvtForwarder, useCreateEvtForwarder, withCreateEvtForwarder }

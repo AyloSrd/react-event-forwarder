@@ -1,6 +1,6 @@
 {
   "name": "react-event-forwarder",
-  "version": "1.0.0",
+  "version": "0.3.0",
   "description": "A small React library to dispatch and forward React and custom events, inspired by Svelte create-event-dispatcher",
   "author": "AyloSrd",
   "license": "MIT",
