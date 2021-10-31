@@ -1,5 +1,5 @@
 import evtForwarder from '../evtForwarder'
-import { Component } from 'react'
+import React, { Component } from 'react'
 
 export default function withCreateEvtForwarder(El){
     return class Wrapper extends Component {

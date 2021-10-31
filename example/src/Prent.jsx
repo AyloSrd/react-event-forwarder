@@ -1,4 +1,6 @@
-import FuncChild from './FuncChild'
+import HookChild from './HookChild'
+import HOCChild from './HOCChild'
+import ClassChild from './ClassChild'
 import React, { useCallback, useState } from 'react'
 
 export default function Parent(props) {
@@ -15,10 +17,24 @@ export default function Parent(props) {
     <>
       <h1>{btn}</h1>
       {props.things.map((thing) => (
-        <FuncChild
+        <HookChild
           key={thing}
           onChoose={changeChoice}
-          thingId={thing}
+          thingId={"hook" + thing}
+        />
+      ))}
+      {props.things.map((thing) => (
+        <ClassChild
+          key={thing}
+          onChoose={changeChoice}
+          thingId={"class" + thing}
+        />
+      ))}
+      {props.things.map((thing) => (
+        <HOCChild
+          key={thing}
+          onChoose={changeChoice}
+          thingId={"HOC" + thing}
         />
       ))}
     </>
