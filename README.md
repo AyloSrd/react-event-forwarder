@@ -1,5 +1,5 @@
 # react-event-forwarder 
-> A small React library to dispatch and forward React and custom events, inspired by Svelte create-event-dispatcher
+> A small React library to dispatch and forward React and custom events, inspired by Svelte's `createEventDispatcher` and Vue's `$emit`
 
 [![NPM](https://img.shields.io/npm/v/react-event-forwarder.svg)](https://www.npmjs.com/package/react-event-forwarder) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
@@ -10,12 +10,9 @@ npm install --save react-event-forwarder
 ```
 
 ## Event-forwarding for truly independent components
+Besides requiring some boilerplate code, lifting the state up in React creates a very special relation of dependence between the parent component and its/their child/ren. Because of this entanglement, changing the state, or the business logic of one component, often entails having to re-think the logic of the other.
 
-
-Lifting the state up in React creates a very special relation of dependency between the parent component and its/their child/ren.
-This entails that often, making changes to event-related pieces of code in one component, entails changing the corresponding code in the other.
-
-The aim of `react-event-forwarder` is to allow child components to forward React events, or custom ones, to their parents, allowing you to create truly independent and re-usable components.
+The aim of `react-event-forwarder` is to allow child components to dispatch and emit custom events (which can carry a specific data payload), or to expose/forward React events to their direct ancestor, allowing you to create truly independent and re-usable components while maintaining a single source of truth.
 
 ## How it works
 
@@ -98,10 +95,10 @@ If you need to memoized it with `useCallback`, don't forget to watch for changes
 
 ```jsx
 //Child
-import { useCreateEvtForwarder } from 'react-event-forwarder'
+import { useEvtForwarder } from 'react-event-forwarder'
 
 export const Child = props => {
-    const forwardEvt = useCreateEvtForwarder(props)
+    const forwardEvt = useEvtForwarder(props)
     
     return (
         <div>
@@ -197,11 +194,11 @@ In the exemple below, the LoadTitle Component will fetch the title of a movie of
 //Child,  using hooks
 
 import { useState } from 'react'
-import { useCreateEvtForwarder } from './lib'
+import { useEvtForwarder } from './lib'
 
 const LoadTitle = props => {
     const { order } = props
-    const forwardEvt = useCreateEvtForwarder(props)
+    const forwardEvt = useEvtForwarder(props)
     const [txt, setTxt] = useState(`Load the ${ film }th movie`)
 
     const confirm = () => {

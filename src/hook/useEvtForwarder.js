@@ -1,5 +1,5 @@
 import evtForwarder from '../evtForwarder'
 
-export default function useCreateEvtForwarder(props) {
+export default function useEvtForwarder(props) {
     return evtForwarder.bind({props})
 }

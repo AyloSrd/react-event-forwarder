@@ -1,6 +1,6 @@
 import { createCustomEvt, retrieveEvtListenerName } from '../utils'
 
-export default function evtForwarder(evt, evtDetail) {
+export default function evtForwarder(evt, evtDetail = 0) {
     const evtType = 
         typeof evt === 'string' ?
             evt 
