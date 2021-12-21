@@ -23,6 +23,10 @@ export default function Parent(props) {
           thingId={"hook" + thing}
         />
       ))}
+      <HookChild
+          key={"hook catch err"}
+          thingId={"hook catch err"}
+        />
       {props.things.map((thing) => (
         <ClassChild
           key={thing}

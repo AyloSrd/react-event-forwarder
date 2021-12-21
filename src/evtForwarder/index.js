@@ -18,8 +18,8 @@ export default function evtForwarder(evt, evtDetail = 0) {
         typeof cb === 'function' ? 
             cb(forwardedEvt)
         :
-            forwardedEvt
-    if (res instanceof Promise) return res
-    const asyncRes = new Promise(resolve => resolve(res))
-    return asyncRes
+            null
+    if (res instanceof Promise) return res.then(() => true)
+    if (typeof cb === 'function') return new Promise(resolve => resolve(true))
+    return new Promise(resolve => resolve(false))
 }

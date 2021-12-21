@@ -1,5 +1,5 @@
 # react-event-forwarder 
-> A small React library to dispatch and forward React and custom events, inspired by Svelte's `createEventDispatcher` and Vue's `$emit`
+> A small React library to dispatch and forward React and custom events and emit values, inspired by Svelte's `createEventDispatcher` and Vue's `$emit`
 
 [![NPM](https://img.shields.io/npm/v/react-event-forwarder.svg)](https://www.npmjs.com/package/react-event-forwarder) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
 
@@ -12,17 +12,17 @@ npm install --save react-event-forwarder
 ## Event-forwarding for truly independent components
 Besides requiring some boilerplate code, lifting the state up in React creates a very special relation of dependence between the parent component and its/their child/ren. Because of this entanglement, changing the state, or the business logic of one component, often entails having to re-think the logic of the other.
 
-The aim of `react-event-forwarder` is to allow child components to dispatch and emit custom events (which can carry a specific data payload), or to expose/forward React events to their direct ancestor, allowing you to create truly independent and re-usable components while maintaining a single source of truth.
+The aim of `react-event-forwarder` is to allow child components to dispatch and emit custom events (which can carry a specific data payload), or to expose/forward React events to their direct ancestor, allowing you to get rid of state-lifting constraints and create truly independent and re-usable components while remaining faithful to the single source of truth principle.
 
 ## How it works
 
-This library is heavily inspired by Svelte's `createEventDispatcher`.
+This library is heavily inspired by Svelte's `createEventDispatcher`, and Vue's `$emit`.
 `react-event-forwarder` provides you with 3 alternatives to create an `eventForwarder`s, depending on whether you prefer working with hooks, class components, or HOCs.
 It is a convention to assign the provided `eventForwarder` to a function or method and name it `forwardEvt` (except when working with the HOC, which will directly pass a prop with such name).
 `forwardEvt` takes a mandatory first argument, `evt`, which is either a `string` or an `Event`, and a second optional argument `evtDetail`, that can be any kind of variable.
 If you want to dispatch and forward a custom event, you shall pass a `string` representing the event name, and, if needed, and an optional payload.
 `react-event-forwarder` will create a Custom Event for you (FYI, the custom event won't bubble).
-You can now simply call it from the Parent, as you would with a normal event (`on`+ `EventName` in Pascal case), and get the payload from `event.detail`.
+You can now simply call it from the Parent, as you would with a normal event (`on`+ `EventName` in Pascal case). The payload will be stored in `event.detail`.
 
 ```jsx
 //Child, consumes forwardEvt from HOC
@@ -51,7 +51,7 @@ const Parent = props => {
 
 ```
 
-If you want to forward a React event, or a custom one forwarded from a direct child, just pass `eventForwarder` to the event listener: it will automatically recognize the event and make it available to the parent as it is (no additional event is created).
+If you want to forward a React event, or a custom one dispatched from a direct child, just pass `eventForwarder` to the event listener: it will automatically recognize the event and expose it to the parent as it is (no additional event is created).
 
 ```jsx
 //Child, consumes forwardEvt from HOC
@@ -78,7 +78,7 @@ const Parent = props => {
 
 ```
 
-On top of this, and differently from Svelte, `react-event-forwarder`, always returns a Promise, allowing you to chain further actions and events at the complition of the event's callback.
+On top of this, and differently from Svelte and Vue, `react-event-forwarder`, always returns a Promise, allowing you to chain further actions and events at the complition of the event's callback.
 
 More info on this async functionality below.
 
@@ -183,122 +183,46 @@ const Parent = props => {
 
 ## Asynchronicity and event chaining
 
-When a forwarded event is fired, the event forwarded will execute the callback function, take the callbacks return value and check wheather it's a promise or not. 
-If the value is a Promise, it will directly return it, otherwhise it will return a Promise resolved with the callback's return value.
+`forwardEvt` let's you know when the callback has finished running by always returning a Promise that resolves to true after the callback is executed, or to `false` if there is no callback for the handler.
 
-This opens the possibility of waiting for the callback to be executed in order to perform further actions independently from the Parent Component, or concatenate events. This may come in useful in all situtaion wher you usually would have to pass additional props such as `isLoading`, or when the component needs to act upon a piece of information that its Parent doesn't necessarily store.
-
-In the exemple below, the LoadTitle Component will fetch the title of a movie of the Star Wars Saga (we'll be using [SWAPI](https://swapi.dev/) for the calls) change its state accordingly, delete itself.
+This opens to the possibility of using `.then` to perform further actions independently from the Parent Component, or concatenate events.
 
 ```jsx
 //Child,  using hooks
 
 import { useState } from 'react'
-import { useEvtForwarder } from './lib'
+import { useEvtForwarder } from 'react-event-forward'
 
-const LoadTitle = props => {
-    const { order } = props
+const Child = props => {
     const forwardEvt = useEvtForwarder(props)
-    const [txt, setTxt] = useState(`Load the ${ film }th movie`)
-
-    const confirm = () => {
-        setTxt('Loading...')
-        return forwardEvt('confirm', { film })
-    }
-
-    const close = async (res) => {
-        const { title } = await res.json()
-        setTxt(`You loaded ${title}. Bye!`)
-        setTimeout(() => forwardEvt('close', { film, title }), 2000)
-    }    
-
-    const handleError = err => {
-        console.error(err)
-        setTxt(`We couldn't load the ${ film }th movie :/ Try again later!`)
-    }
 
     return (
-        <div>
-            <h2>{txt}</h2>
-            <button
-                onClick={
-                    () => confirm()
-                            .then(close)
-                            .catch(handleError)
-                }
-            >
-                Load
-            </button>
-            
-        </div>
+        <button
+            onClick={() => {
+                forwardEvt('message', { msg: 'yooo' })
+                    .then(res => res 
+                        ? forwardEvt('close')
+                        : console.error('a problem ocurred')
+                    )
+            }}
+        >
+            Send
+        </button>
     )
 }
 
 //Parent
 
 export default function Parent({ things }) {
-  const [btn, setBtn] = useState('click on one btn')
-  const [additionalState, setAdditionalState] = useState('yooo')
-  const [films, setFilms] = useState(['4', '5', '6'])
-  const [loadedMovies, setLoadedMovies] = useState([])
-
-  const changeChoice = useCallback(
-      (e) => {
-          setBtn(e.detail)
-      },
-      [],
-  )
-
-    const handleConfirm = ({detail: { film } }) => fetch(`https://swapi.dev/api/films/${film}/`)
-
-    const handleRemoveFilm = ({ detail: { film, title } }) => {
-        setLoadedMovies([...loadedMovies, title])
-        setFilms([...films].filter(f => f !== film))    
-    }
-
-  const fetchAdresses = useCallback(e => fetch(e.detail), [])
+    // business logic of the parent component
 
   return (
-    <>
-        <h1>Star Wars Saga</h1>
-        <h2>you have loaded {loadedMovies.length} movies : </h2>
-        <h2>
-            <ul>
-            {loadedMovies.map(movie => <li>{movie}</li>)}
-            </ul>
-        </h2>
-        <br/>  
-        <br/>
-        {films.map(film => (
-            <LoadStuff
-            film={film}
-            key={film}
-            onClose={handleRemoveFilm}
-            onConfirm={handleConfirm}
-            />
-        ))
-        }
-    </>
+      <Child 
+        onClose={closeChild}
+        onMessage={e => handleMessage(e.detail.msg)}
+    >
   )
 }
-```
-
-You can of course do the async work in the Parent's callback, it will work the same; below how you should respectively refactor `close` and `handleConfirm` : 
-
-```jsx
-//Child 
-const close = async (res) => {
-    console.log(res)
-    const { title } = await res.json()
-    setTxt(`You loaded ${title}. Bye!`)
-    setTimeout(() => forwardEvt('close', { film, title }), 2000)
-} 
-//Parent
-  const handleConfirm = async ({detail: { film } }) => {
-    const rres = await fetch(`https://swapi.dev/api/films/${film}/`)
-    const res = await rres.json()
-    return res
-  } 
 ```
 
 ## License

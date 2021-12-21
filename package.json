@@ -1,7 +1,7 @@
 {
   "name": "react-event-forwarder",
-  "version": "0.4.0",
-  "description": "A small React library to dispatch and forward React and custom events, inspired by Svelte's createEventDispatcher and Vue's $emit",
+  "version": "0.5.1",
+  "description": "A small React library to dispatch and forward React and custom events end emit values, inspired by Svelte's createEventDispatcher and Vue's $emit",
   "author": "AyloSrd",
   "license": "MIT",
   "repository": "AyloSrd/react-event-forwarder",
